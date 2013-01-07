@@ -1,14 +1,16 @@
-descStats <- function(x, stats = c("n", "min", "max", "range", "mean", "median", "sd")) {
+descStats <- function(x, skew = FALSE, byrow = FALSE) {
+  x <- as.matrix(x)
+  if(byrow) x <- t(x)
+  stats <- c("n", "min", "max", "range", "mean", "median", "sd")
+  if (skew) {
+    library(moments)
+    stats <- c(stats, "skewness", "kurtosis")
+  }
   n <- function(x, ...) sum(!is.na(x), ...)
   range <- function(x, ...) max(x, ...) - min(x, ...)
-  fun <- function(x) {
-    result <- vapply(stats, function(z) eval(call(z, x, na.rm=TRUE)), FUN.VALUE=numeric(1))
+  describe <- function(x) {
+    result <- vapply(stats, function(fun) eval(call(fun, x, na.rm=TRUE)), FUN.VALUE=numeric(1))
   }
-  if (is.vector(x)) {
-    result <- fun(x)
-  }
-  if (is.matrix(x) || is.data.frame(x)) {
-    result <- t(apply(x, 2, fun))
-  }
-  return(result)
+  out <- t(vapply(seq_len(ncol(x)), function(i) describe(x[,i]), FUN.VALUE=numeric(length(stats))))
+  return(out)
 }
