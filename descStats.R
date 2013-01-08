@@ -2,7 +2,7 @@ descStats <- function(x, na.rm = TRUE, trim = NULL, skew = FALSE, byrow = FALSE,
   fun <- function(x) {
     if(na.rm) x <- x[!is.na(x)]
     n <- length(x)
-    mean <- .Internal(mean(x))
+    mean <- sum(x) / n
     dev <- x - mean
     dev_s2 <- sum(dev^2L)
     sd <- sqrt(dev_s2 / (n-1))
@@ -25,10 +25,8 @@ descStats <- function(x, na.rm = TRUE, trim = NULL, skew = FALSE, byrow = FALSE,
     }
     if (skew) {      
       skewness <- (sum(dev^3L)/n) / (dev_s2/n)^1.5
-      stats <- c(stats, skewness)
-      
       kurtosis <- n * sum(dev^4L) / (dev_s2^2L)
-      stats <- c(stats, kurtosis)
+      stats <- c(stats, skewness, kurtosis)
     }
     stats
   }
@@ -36,11 +34,10 @@ descStats <- function(x, na.rm = TRUE, trim = NULL, skew = FALSE, byrow = FALSE,
   if(byrow) x <- t(x)
   nstats <- c("n", "mean", "se", "sd", "median", "min", "max", "range")
   if (skew) nstats <- c(nstats, "skewness", "kurtosis")
-  if (!is.null(trim)) nstats <- append(nstats, "trimmed", which(nstats == "mean"))
-  
-  out <- t(vapply(seq_len(ncol(x)), function(i) fun(x[,i]), FUN.VALUE = numeric(length(nstats))))
-  dimnames(out) <- list(colnames(x), nstats)
-  #out <- matrix(0.0, ncol = length(nstats), nrow = ncol(x), dimnames = list(colnames(x), nstats))
-  #for(i in 1:ncol(x)) out[i,] <- fun(x[,i])
+  if (!is.null(trim)) nstats <- append(nstats, "trimmed", 2)
+  #out <- t(vapply(seq_len(ncol(x)), function(i) fun(x[,i]), FUN.VALUE = numeric(length(nstats))))
+  #dimnames(out) <- list(colnames(x), nstats)
+  out <- matrix(0.0, ncol = length(nstats), nrow = ncol(x), dimnames = list(colnames(x), nstats))
+  for(i in 1:ncol(x)) out[i,] <- fun(x[,i])
   round(out, digits=digits)
 }
