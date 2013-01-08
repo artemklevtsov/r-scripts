@@ -2,17 +2,17 @@ descStats <- function(x, na.rm = TRUE, trim = NULL, skew = FALSE, byrow = FALSE,
   fun <- function(x) {
     if(na.rm) x <- x[!is.na(x)]
     n <- length(x)
-    mean <- sum(x)/n # mean
-    dev <- x-mean
+    mean <- .Internal(mean(x))
+    dev <- x - mean
     dev_s2 <- sum(dev^2L)
-    sd <- sqrt(dev_s2/(n-1)) # sd
-    se <- sqrt(sd/n) # se
-    median <- local({ # median
+    sd <- sqrt(dev_s2 / (n-1))
+    se <- sqrt(sd / n)
+    median <- local({
       half <- (n + 1L)%/%2L
       if (n%%2L == 1L) 
         .Internal(sort(x, partial = half))[half]
       else {
-        mean(.Internal(sort(x, partial = half + 0L:1L))[half + 0L:1L])
+        .Internal(mean(.Internal(sort(x, partial = half + 0L:1L))[half + 0L:1L]))
       }
     })
     min <- min(x)
@@ -38,11 +38,9 @@ descStats <- function(x, na.rm = TRUE, trim = NULL, skew = FALSE, byrow = FALSE,
   if (skew) nstats <- c(nstats, "skewness", "kurtosis")
   if (!is.null(trim)) nstats <- append(nstats, "trimmed", which(nstats == "mean"))
   
-  #out <- t(vapply(seq_len(ncol(x)), function(i) fun(x[,i]), FUN.VALUE=numeric(length(nstats))))
-  #dimnames(out) <- list(colnames(x), nstats)
-  out <- matrix(0.0, ncol = length(nstats), nrow = ncol(x), dimnames=list(colnames(x), nstats))
-  for(i in 1:ncol(x)) {
-    out[i,] <- fun(x[,i])    
-  }
+  out <- t(vapply(seq_len(ncol(x)), function(i) fun(x[,i]), FUN.VALUE = numeric(length(nstats))))
+  dimnames(out) <- list(colnames(x), nstats)
+  #out <- matrix(0.0, ncol = length(nstats), nrow = ncol(x), dimnames = list(colnames(x), nstats))
+  #for(i in 1:ncol(x)) out[i,] <- fun(x[,i])
   round(out, digits=digits)
 }
