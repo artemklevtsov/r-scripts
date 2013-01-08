@@ -38,7 +38,8 @@ descStats <- function(x, na.rm = TRUE, trim = NULL, skew = FALSE, byrow = FALSE,
   if (skew) nstats <- c(nstats, "skewness", "kurtosis")
   if (!is.null(trim)) nstats <- append(nstats, "trimmed", which(nstats == "mean"))
   
-  #out <- t(vapply(seq_len(ncol(x)), function(i) fun(x[,i]), FUN.VALUE=numeric(nstats)))
+  #out <- t(vapply(seq_len(ncol(x)), function(i) fun(x[,i]), FUN.VALUE=numeric(length(nstats))))
+  #dimnames(out) <- list(colnames(x), nstats)
   out <- matrix(0.0, ncol = length(nstats), nrow = ncol(x), dimnames=list(colnames(x), nstats))
   for(i in 1:ncol(x)) {
     out[i,] <- fun(x[,i])    
