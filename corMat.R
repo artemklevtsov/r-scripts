@@ -5,7 +5,7 @@ corMat <- function(x, method = c("pearson", "kendall", "spearman"), digits=getOp
   method <- match.arg(method)
   cor.mat <- cor(mat, method = method)
   index <- combn(ncol(mat), 2)
-  pvals <- mapply(function(x, y) cor.test(mat[, x], mat[, y], method = method)$p.value, index[1, ], index[2, ])
+  pvals <- vapply(seq_len(ncol(index)), function(i)  cor.test(mat[, index[1, i]], mat[, index[2, i]], method = method)$p.value, FUN.VALUE=numeric(1))
   cor.mat[lower.tri(cor.mat)] <- pvals
   diag(cor.mat) <- NA
   round(cor.mat, digits=digits)
