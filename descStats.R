@@ -31,13 +31,14 @@ descStats <- function(x, na.rm = TRUE, trim = NULL, skew = FALSE, byrow = FALSE,
     stats
   }
   if (!is.matrix(x)) x <- as.matrix(x)
-  if(byrow) x <- t(x)
+  if(byrow) x <- t.default(x)
   nstats <- c("n", "mean", "se", "sd", "median", "min", "max", "range")
   if (skew) nstats <- c(nstats, "skewness", "kurtosis")
   if (!is.null(trim)) nstats <- append(nstats, "trimmed", 2)
-  #out <- t(vapply(seq_len(ncol(x)), function(i) fun(x[,i]), FUN.VALUE = numeric(length(nstats))))
-  #dimnames(out) <- list(colnames(x), nstats)
-  out <- matrix(0.0, ncol = length(nstats), nrow = ncol(x), dimnames = list(colnames(x), nstats))
-  for(i in 1:ncol(x)) out[i,] <- fun(x[,i])
+  out <- matrix(
+    unlist(
+      lapply(seq_len(ncol(x)), function(i) fun(x[,i]))),
+    ncol = length(nstats), nrow = ncol(x),
+    dimnames = list(colnames(x), nstats), byrow=TRUE)
   round(out, digits=digits)
 }
