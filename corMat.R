@@ -1,7 +1,7 @@
 corMat <- function(x, method = c("pearson", "kendall", "spearman"), digits=getOption("digits")) {
   stopifnot(is.matrix(x) || is.data.frame(x))
   stopifnot(ncol(x) > 1L)
-  ifelse (is.data.frame(x),  mat <- data.matrix(x), mat <- x)
+  ifelse(is.data.frame(x),  mat <- data.matrix(x), mat <- x)
   method <- match.arg(method)
   cor.mat <- cor(mat, method = method)
   index <- combn(ncol(mat), 2)
