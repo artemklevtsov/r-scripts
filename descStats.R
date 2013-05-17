@@ -20,7 +20,12 @@ descStats <- function(x, na.rm = TRUE, trim = NULL, skew = FALSE, byrow = FALSE,
     range <- max - min
     stats <- c(n, mean, se, sd, median, min, max, range)
     if (!is.null(trim)) {
-      trimmed <- mean.default(x, trim=trim)
+      trimmed <- local({
+        lo <- floor(n * trim) + 1
+        hi <- n + 1 - lo
+        x <- .Internal(sort(x, partial = unique(c(lo, hi))))[lo:hi]
+        sum(x) / n
+      })
       stats <- append(stats, trimmed, 2)
     }
     if (skew) {      
@@ -37,8 +42,8 @@ descStats <- function(x, na.rm = TRUE, trim = NULL, skew = FALSE, byrow = FALSE,
   if (!is.null(trim)) nstats <- append(nstats, "trimmed", 2)
   out <- matrix(
     unlist(
-      lapply(seq_len(ncol(x)), function(i) fun(x[,i]))),
-    ncol = length(nstats), nrow = ncol(x),
+      lapply(seq_len(ncol(x)), function(i) fun(x[,i]))
+    ), ncol = length(nstats), nrow = ncol(x),
     dimnames = list(colnames(x), nstats), byrow=TRUE)
   round(out, digits=digits)
 }
