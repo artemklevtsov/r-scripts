@@ -1,7 +1,8 @@
 descStats <- function(x, na.rm = TRUE, trim = NULL, skew = FALSE, byrow = FALSE, digits = getOption("digits")) {
   fun <- function(x) {
     stopifnot(is.numeric(x))
-    if (na.rm) x <- x[!is.na(x)]
+    if (na.rm)
+      x <- x[!is.na(x)]
     n <- length(x)
     mean <- sum(x) / n
     dev <- x - mean
@@ -40,11 +41,15 @@ descStats <- function(x, na.rm = TRUE, trim = NULL, skew = FALSE, byrow = FALSE,
     }
     return(stats)
   }
-  if (!is.matrix(x)) x <- as.matrix(x)
-  if(byrow) x <- t.default(x)
+  if (!is.matrix(x))
+    x <- as.matrix(x)
+  if(byrow)
+    x <- t.default(x)
   nstats <- c("n", "mean", "se", "sd", "median", "min", "max", "range")
-  if (skew) nstats <- c(nstats, "skewness", "kurtosis")
-  if (!is.null(trim)) nstats <- append(nstats, "trimmed", 2)
+  if (skew)
+    nstats <- c(nstats, "skewness", "kurtosis")
+  if (!is.null(trim))
+    nstats <- append(nstats, "trimmed", 2)
   out <- matrix(
     unlist(
       lapply(seq_len(ncol(x)), function(i) fun(x[,i]))
