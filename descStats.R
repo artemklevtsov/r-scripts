@@ -50,8 +50,8 @@ descStats <- function(x, na.rm = TRUE, trim = NULL, skew = FALSE, byrow = FALSE,
   var.names <- colnames(x)
   n.vars <- ncol(x)
   result <- matrix(0, ncol = length(stat.nanmes), nrow = n.vars,
-                   dimnames = list(var.names, stat.nanmes), byrow=TRUE)
+                   dimnames = list(var.names, stat.nanmes), byrow = TRUE)
   for (i in seq_len(n.vars))
     result[i, ] <- fun(x[, i])
-  return(round(result, digits=digits))
+  return(signif(result, digits = digits))
 }
