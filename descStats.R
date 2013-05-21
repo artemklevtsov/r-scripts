@@ -38,6 +38,16 @@ descStats <- function(x, na.rm = TRUE, trim = NULL, skew = FALSE, byrow = FALSE,
     }
     return(stats)
   }
+  var.names <- colnames(x)
+  n.vars <- ncol(x)
+  if (is.data.frame(x)) {
+    for (i in seq_len(n.vars)) {
+      if (!is.numeric(x[, i])) {
+        x <- x[, -i]
+        warning(paste("Variable \"", colnames(x)[i], "\"was removed from data.frame."))
+      }
+    }
+  }
   if (!is.matrix(x))
     x <- as.matrix(x)
   if (byrow)
@@ -47,9 +57,7 @@ descStats <- function(x, na.rm = TRUE, trim = NULL, skew = FALSE, byrow = FALSE,
     stat.nanmes <- c(stat.nanmes, "skewness", "kurtosis")
   if (!is.null(trim))
     stat.nanmes <- append(stat.nanmes, "trimmed", 2)
-  var.names <- colnames(x)
-  n.vars <- ncol(x)
-  result <- matrix(0, ncol = length(stat.nanmes), nrow = n.vars,
+  result <- matrix(numeric(1), ncol = length(stat.nanmes), nrow = n.vars,
                    dimnames = list(var.names, stat.nanmes), byrow = TRUE)
   for (i in seq_len(n.vars))
     result[i, ] <- fun(x[, i])
