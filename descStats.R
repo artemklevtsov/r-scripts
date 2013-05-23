@@ -42,7 +42,7 @@ descStats <- function(x, na.rm = TRUE, trim = NULL, skew = FALSE, byrow = FALSE,
   n.vars <- ncol(x)
   if (is.data.frame(x)) {
     for (i in seq_len(n.vars)) {
-      if (!is.numeric(x[, i])) {
+      if (!is.numeric(x[, i]) || is.factor(x[, i])) {
         x <- x[, -i]
         warning(paste("Variable \"", colnames(x)[i], "\"was removed from data.frame."))
       }
