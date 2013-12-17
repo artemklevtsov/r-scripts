@@ -1,19 +1,19 @@
 descStats <- function(x, na.rm = TRUE, trim = NULL, skew = FALSE, byrow = FALSE, digits = getOption("digits")) {
   fun <- function(x) {
     stopifnot(is.numeric(x))
-    if (na.rm)
-      x <- x[!is.na(x)]
+    if (na.rm) x <- x[!is.na(x)]
+    stats <- numeric(8)
     n <- length(x)
     mean <- sum(x) / n
     dev <- x - mean
-    dev_ss <- sum(dev^2L)
-    sd <- sqrt(dev_ss / (n - 1))
+    dev_s2 <- sum(dev^2L)
+    sd <- sqrt(dev_s2 / (n - 1))
     se <- sqrt(sd / n)
-    half <- (n + 1L)%/%2L
+    half <- (n + 1L) %/% 2L
     if (n %% 2L == 1L)
-      median <- .Internal(sort(x, partial = half))[half]
+      median <- sort(x, partial = half)[half]
     else
-      median <- .Internal(mean(.Internal(sort(x, partial = half + 0L:1L))[half + 0L:1L]))
+      median <- sum(sort(x, partial = half + 0L:1L)[half + 0L:1L]) / 2L
     min <- min(x)
     max <- max(x)
     range <- max - min
@@ -25,7 +25,7 @@ descStats <- function(x, na.rm = TRUE, trim = NULL, skew = FALSE, byrow = FALSE,
         trimmed <- local({
           lo <- floor(n * trim) + 1
           hi <- n + 1 - lo
-          x <- .Internal(sort(x, partial = unique(c(lo, hi))))[lo:hi]
+          x <- sort(x, partial = unique(c(lo, hi)))[lo:hi]
           return(sum(x) / n)
         })
       }
@@ -38,7 +38,7 @@ descStats <- function(x, na.rm = TRUE, trim = NULL, skew = FALSE, byrow = FALSE,
     }
     return(stats)
   }
-  var.names <- colnames(x)
+  cn <- colnames(x)
   n.vars <- ncol(x)
   if (is.data.frame(x)) {
     for (i in seq_len(n.vars)) {
@@ -52,13 +52,13 @@ descStats <- function(x, na.rm = TRUE, trim = NULL, skew = FALSE, byrow = FALSE,
     x <- as.matrix(x)
   if (byrow)
     x <- t.default(x)
-  stat.nanmes <- c("n", "mean", "se", "sd", "median", "min", "max", "range")
+  sn <- c("n", "mean", "se", "sd", "median", "min", "max", "range")
   if (skew)
-    stat.nanmes <- c(stat.nanmes, "skewness", "kurtosis")
+    sn <- c(stat.nanmes, "skewness", "kurtosis")
   if (!is.null(trim))
-    stat.nanmes <- append(stat.nanmes, "trimmed", 2)
-  result <- matrix(numeric(1), ncol = length(stat.nanmes), nrow = n.vars,
-                   dimnames = list(var.names, stat.nanmes), byrow = TRUE)
+    sn <- append(stat.nanmes, "trimmed", 2)
+  result <- matrix(numeric(1), ncol = length(sn), nrow = n.vars,
+                   dimnames = list(cn, sn), byrow = TRUE)
   for (i in seq_len(n.vars))
     result[i, ] <- fun(x[, i])
   return(signif(result, digits = digits))
