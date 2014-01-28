@@ -13,12 +13,13 @@ proftable.default <- function(filename, lines = 10) {
   filenames <- gsub("^#File [0-9]+: ", "", files)
   if (length(filelines))
     profdata <- profdata[-1:-filelines]
-  total.time <- interval * length(profdata)
   ncalls <- length(profdata)
+  total.time <- interval * ncalls
   profdata <- gsub("\\\"| $", "", profdata)
-  calls <- lapply(profdata, function(x) rev(unlist(strsplit(x, " "))))
+  profdata <- strsplit(profdata, " ")
+  calls <- lapply(profdata, function(x) rev(x))
   calls.len <- range(sapply(calls, length))
-  parent.call <- unlist(lapply(seq(calls.len[1]), function(i) Reduce(intersect, lapply(calls,"[[", i))))
+  parent.call <- unlist(lapply(seq(calls.len[1]), function(i) Reduce(intersect, lapply(unique(calls), "[[", i))))
   calls <- lapply(calls, function(x) setdiff(x, parent.call))
   stacktable <- as.data.frame(table(sapply(calls, function(x) paste(x, collapse = " > "))) / ncalls * 100, stringsAsFactors = FALSE)
   stacktable <- stacktable[order(stacktable$Freq[], decreasing = TRUE), 2:1]
@@ -45,4 +46,4 @@ print.proftable <- function(x) {
   cat(paste("Total Time:", x$total.time, "seconds"))
   cat("\n")
   cat(paste0("Percent of run time represented: ", format(x$total.pct.time, digits = 3), "%"))
-} 
+}
