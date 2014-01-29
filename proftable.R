@@ -30,13 +30,13 @@ proftable <- function(filename, lines = 10) {
   else
     parent.call <- "None"
   frac <- sum(stacktable$PctTime)
-  result <- list(data = profdata, stacktable = stacktable, parent.call = parent.call, interval = interval, total.time = total.time, files = filenames, total.pct.time = frac)
+  result <- list(data = profdata, table = stacktable, parent.call = parent.call, interval = interval, total.time = total.time, files = filenames, total.pct.time = frac)
   class(result) <- "proftable"
   return(result)
 }
  
 print.proftable <- function(x) {
-  print(x$stacktable, row.names=FALSE, right=FALSE, digits=3)
+  print(x$table, row.names=FALSE, right=FALSE, digits=3)
   cat("\nFiles:\n")
   cat(paste(x$files, collapse="\n"))
   cat("\n\n")
