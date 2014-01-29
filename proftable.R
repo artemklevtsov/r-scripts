@@ -1,4 +1,8 @@
-proftable <- function(filename, lines = 10) {
+proftable <- function(x, ...) {
+  UseMethod("proftable")
+}
+
+proftable.default <- function(filename, lines = 10) {
   con <- file(filename, "rt")
   on.exit(close(con))
   profdata <- readLines(con)
