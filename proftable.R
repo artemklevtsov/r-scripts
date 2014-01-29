@@ -3,31 +3,34 @@ proftable <- function(filename, lines = 10) {
   on.exit(close(con))
   profdata <- readLines(con)
   interval <- as.numeric(strsplit(profdata[1L], "=")[[1L]][2L]) / 1e+06
+  profdata <- profdata[-1L]
   filelines <- grep("^#File [0-9]+: ", profdata)
-  files <- profdata[filelines]
-  filenums <- as.integer(gsub("^#File ([0-9]+): .*", "\\1", files))
-  filenames <- gsub("^#File [0-9]+: ", "", files)
-  if (length(filelines))
-    profdata <- profdata[-1:-filelines]
+  if (length(filelines)) {
+    files <- profdata[filelines]
+    filenums <- as.integer(gsub("^#File ([0-9]+): .*", "\\1", files))
+    filenames <- gsub("^#File [0-9]+: ", "", files)
+    profdata <- profdata[-filelines]
+  }
   ncalls <- length(profdata)
   total.time <- interval * ncalls
   profdata <- gsub("\\\"| $", "", profdata)
-  profdata <- strsplit(profdata, " ")
-  calls <- lapply(profdata, function(x) rev(x))
-  min.len <- min(sapply(calls, length))
+  stacktable <- as.data.frame(table(profdata) / ncalls * 100, stringsAsFactors = FALSE)
+  calls <- strsplit(stacktable$profdata, " ")
+  calls <- lapply(calls, function(x) rev(x))
+  min.len <- min(vapply(calls, length, FUN.VALUE = numeric(1)))
   parent.call <- unlist(lapply(seq_len(min.len), function(i) Reduce(intersect, lapply(unique(calls), "[[", i))))
   calls <- lapply(calls, function(x) setdiff(x, parent.call))
-  stacktable <- as.data.frame(table(sapply(calls, function(x) paste(x, collapse = " > "))) / ncalls * 100, stringsAsFactors = FALSE)
+  stacktable$profdata <- vapply(calls, function(x) paste(x, collapse = " > "), FUN.VALUE = character(1))
   stacktable <- stacktable[order(stacktable$Freq[], decreasing = TRUE), 2:1]
   colnames(stacktable) <- c("PctTime", "Call")
   rownames(stacktable) <- NULL
-    stacktable <- head(stacktable, lines)
+  stacktable <- head(stacktable, lines)
   if (length(parent.call) > 0)
     parent.call <- paste(parent.call, collapse = " > ")
   else
     parent.call <- "None"
   frac <- sum(stacktable$PctTime)
-  result <- list(calls = calls, stacktable = stacktable, parent.call = parent.call, interval = interval, total.time = total.time, files = filenames, total.pct.time = frac)
+  result <- list(data = profdata, stacktable = stacktable, parent.call = parent.call, interval = interval, total.time = total.time, files = filenames, total.pct.time = frac)
   class(result) <- "proftable"
   return(result)
 }
