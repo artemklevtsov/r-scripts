@@ -6,25 +6,23 @@ proftable.default <- function(filename, lines = 10) {
     profdata <- scan(filename, what = "character", quote = "\"", strip.white = TRUE, sep = "\n", quiet = TRUE)
     interval <- as.numeric(strsplit(profdata[1L], "=")[[1L]][2L]) / 1e+06
     profdata <- profdata[-1L]
-    filelines <- grep("^#File [0-9]+: ", profdata)
+    filelines <- grep("^#File", profdata)
     if (length(filelines)) {
         files <- profdata[filelines]
-        filenums <- as.integer(gsub("^#File ([0-9]+): .*", "\\1", files))
-        filenames <- gsub("^#File [0-9]+: ", "", files)
+        filenames <- gsub("^#File ", "", files)
         profdata <- profdata[-filelines]
     }
     ncalls <- length(profdata)
     total.time <- interval * ncalls
-    stacktable <- as.data.frame(table(profdata) / ncalls * 100, stringsAsFactors = FALSE)
-    calls <- strsplit(stacktable$profdata, " ")
+    pct.time <- tabulate(factor(profdata)) / ncalls * 100
+    calls <- strsplit(sort(unique(profdata)), " ")
     calls <- lapply(calls, function(x) rev(x))
     min.len <- min(vapply(calls, length, FUN.VALUE = numeric(1)))
-    parent.call <- unlist(lapply(seq_len(min.len), function(i) Reduce(intersect, lapply(unique(calls), "[[", i))))
+    parent.call <- unlist(lapply(seq_len(min.len), function(i) Reduce(intersect, lapply(calls, "[[", i))))
     calls <- lapply(calls, function(x) setdiff(x, parent.call))
-    stacktable$profdata <- vapply(calls, function(x) paste(x, collapse = " > "), FUN.VALUE = character(1))
-    stacktable <- stacktable[order(stacktable$Freq[], decreasing = TRUE), 2:1]
-    colnames(stacktable) <- c("PctTime", "Call")
-    rownames(stacktable) <- NULL
+    calls <- vapply(calls, function(x) paste(x, collapse = " > "), FUN.VALUE = character(1))
+    stacktable <- data.frame(PctTime = pct.time, Call = calls, stringsAsFactors = FALSE)
+    stacktable <- stacktable[order(stacktable$PctTime, decreasing = TRUE), ]
     stacktable <- head(stacktable, lines)
     if (length(parent.call) > 0)
         parent.call <- paste(parent.call, collapse = " > ")
