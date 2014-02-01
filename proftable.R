@@ -3,9 +3,7 @@ proftable <- function(x, ...) {
 }
 
 proftable.default <- function(filename, lines = 10) {
-    con <- file(filename, "rt")
-    on.exit(close(con))
-    profdata <- readLines(con)
+    profdata <- scan(filename, what = "character", quote = "\"", strip.white = TRUE, sep = "\n", quiet = TRUE)
     interval <- as.numeric(strsplit(profdata[1L], "=")[[1L]][2L]) / 1e+06
     profdata <- profdata[-1L]
     filelines <- grep("^#File [0-9]+: ", profdata)
@@ -17,7 +15,6 @@ proftable.default <- function(filename, lines = 10) {
     }
     ncalls <- length(profdata)
     total.time <- interval * ncalls
-    profdata <- gsub("\\\"| $", "", profdata)
     stacktable <- as.data.frame(table(profdata) / ncalls * 100, stringsAsFactors = FALSE)
     calls <- strsplit(stacktable$profdata, " ")
     calls <- lapply(calls, function(x) rev(x))
@@ -38,7 +35,7 @@ proftable.default <- function(filename, lines = 10) {
     class(result) <- "proftable"
     return(result)
 }
- 
+
 print.proftable <- function(x) {
     print(x$table, row.names=FALSE, right=FALSE, digits=3)
     cat("\nFiles:\n")
