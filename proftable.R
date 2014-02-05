@@ -3,7 +3,7 @@ proftable <- function(x, ...) {
 }
 
 proftable.default <- function(filename, lines = 10) {
-    profdata <- scan(filename, what = "character", quote = "\"", strip.white = TRUE, sep = "\n", quiet = TRUE)
+    profdata <- scan(filename, what = "character", quote = "\"", strip.white = TRUE, sep = "\n", quiet = TRUE, multi.line = FALSE)
     interval <- as.numeric(strsplit(profdata[1L], "=")[[1L]][2L]) / 1e+06
     profdata <- profdata[-1L]
     filelines <- grep("^#File", profdata)
